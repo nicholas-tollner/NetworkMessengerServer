@@ -44,6 +44,7 @@ int main() {
     hints.ai_protocol = IPPROTO_TCP;        // Specify TCP protocol
     hints.ai_flags = AI_PASSIVE;            // PASSIVE refers t
 
+    // Source IP Address
     iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
     if (iResult != 0)
     {
@@ -52,16 +53,50 @@ int main() {
         return 1;
     }
 
-    SOCKET ListenSocket = INVALID_SOCKET;
-    ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+    SOCKET listenSocket = INVALID_SOCKET;
+    listenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
-    if (ListenSocket == INVALID_SOCKET)
+    if (listenSocket == INVALID_SOCKET)
     {
         printf("Error at socket(): %ld\n", WSAGetLastError());
         freeaddrinfo(result);
         WSACleanup();
         return 1;
     }
+
+
+    iResult = bind(listenSocket, result->ai_addr, (int)result->ai_addrlen);
+    if (iResult == SOCKET_ERROR)
+    {
+        printf("Bind failed with error: %d\n", WSAGetLastError());
+        freeaddrinfo(result);
+        closesocket(listenSocket);
+        WSACleanup();
+        return 1;
+    }
+
+    // Once bind is complete addrinfo from result is no longer required
+    freeaddrinfo(result);
+
+    if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR)
+    {
+        printf("Listen failed with error: %ld\n", WSAGetLastError());
+        closesocket(listenSocket);
+        WSACleanup();
+        return 1;
+    }
+
+    SOCKET clientSocket;
+    // Accept a socket connection
+    clientSocket = accept(listenSocket, NULL, NULL);
+    if (clientSocket == INVALID_SOCKET)
+    {
+        printf("accept failed: %d\n", WSAGetLastError());
+        closesocket(clientSocket);
+        WSACleanup();
+        return 1;
+    }
+
 
 
     std::cout << "Closing ..." << std::endl;
