@@ -1,3 +1,0 @@
-"D:\CLion 2021.3.4\bin\cmake\win\bin\cmake.exe" -E rm -f CMakeFiles\NetworkMessengerServer.dir/objects.a
-C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\ar.exe qc CMakeFiles\NetworkMessengerServer.dir/objects.a @CMakeFiles\NetworkMessengerServer.dir\objects1.rsp
-C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\G__~1.EXE -g -Wl,--whole-archive CMakeFiles\NetworkMessengerServer.dir/objects.a -Wl,--no-whole-archive -o NetworkMessengerServer.exe -Wl,--out-implib,libNetworkMessengerServer.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\NetworkMessengerServer.dir\linklibs.rsp
