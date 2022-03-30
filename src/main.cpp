@@ -4,25 +4,27 @@
 #include <stdio.h>
 
 #define DEFAULT_PORT "54321"
+#define DEFAULT_BUFLEN 512
 
  // Create 3 addrinfo structs from ws2tcpip.h
-struct addrinfo *result = NULL, *ptr = NULL, hints;
 
 int main() {
     std::cout << "Server starting ... " << std::endl;
 
-    // --- Flags to specify connection type ---
-    // AF_LOCAL for communication between processes on same host
-    // AF_INET for IPv4 - 32-bit address / 4 bytes
-    // AF_INET6 for IPv6 - 128-bit address / 16 bytes
-
-    // -- Flags to specify communication type ---
-    // TCP - Transmission control protocol
-    // UDP - User datagram protocol -> connectionless
-
     WSADATA wsaData;
     int iResult;
 
+    char recvbuf[DEFAULT_BUFLEN];       // char buffer
+    int iSendResult;
+    int recvbuflen = DEFAULT_BUFLEN;
+
+    struct addrinfo *result = NULL;
+    struct addrinfo hints;
+
+    SOCKET listenSocket = INVALID_SOCKET;
+    SOCKET clientSocket = INVALID_SOCKET;
+
+    // Initialise Winsock
     /**
      * WSAStartup initiates Winsock DLL
      * MAKEWORD concatenates two 1-byte words into one 16-bit word
@@ -30,7 +32,6 @@ int main() {
      * If iResult != 0, WSAStartup has failed
      */
     iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
-
     if (iResult != 0)
     {
         printf("WSAStartup failed: %d\n", iResult);
@@ -42,9 +43,9 @@ int main() {
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;        // Specify TCP protocol
-    hints.ai_flags = AI_PASSIVE;            // PASSIVE refers t
+    hints.ai_flags = AI_PASSIVE;            // PASSIVE indicates socket address structure will be used in bind function
 
-    // Source IP Address
+    // Source IP Address and port
     iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
     if (iResult != 0)
     {
@@ -53,9 +54,8 @@ int main() {
         return 1;
     }
 
-    SOCKET listenSocket = INVALID_SOCKET;
+    // Create server socket
     listenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-
     if (listenSocket == INVALID_SOCKET)
     {
         printf("Error at socket(): %ld\n", WSAGetLastError());
@@ -64,7 +64,7 @@ int main() {
         return 1;
     }
 
-
+    // Setup server socket to listen for connections
     iResult = bind(listenSocket, result->ai_addr, (int)result->ai_addrlen);
     if (iResult == SOCKET_ERROR)
     {
@@ -86,8 +86,7 @@ int main() {
         return 1;
     }
 
-    SOCKET clientSocket;
-    // Accept a socket connection
+    // Accept a socket connection from client
     clientSocket = accept(listenSocket, NULL, NULL);
     if (clientSocket == INVALID_SOCKET)
     {
@@ -97,7 +96,47 @@ int main() {
         return 1;
     }
 
+    // Close listen socket once connection has been made
+    closesocket(listenSocket);
 
+    // Receive until client closes connection
+    do {
+        iResult = recv(clientSocket, recvbuf, recvbuflen, 0);
+        if (iResult > 0) {
+            printf("Bytes received : %d\n", iResult);
+
+            // Echo buffer back to sender
+            iSendResult = send(clientSocket, recvbuf, iResult, 0);
+            if (iSendResult == SOCKET_ERROR) {
+                printf("send failed: %d\n", WSAGetLastError());
+                closesocket(clientSocket);
+                WSACleanup();
+                return 1;
+            }
+            printf("Bytes sent: %d\n", iSendResult);
+        } else if (iResult == 0) {
+            printf("Connection closing ... \n");
+        } else {
+            printf("recv failed: %d\n", WSAGetLastError());
+            closesocket(clientSocket);
+            WSACleanup();
+            return 1;
+        }
+    } while (iResult > 0);
+
+    // Shutdown connections to
+    iResult = shutdown(clientSocket, SD_SEND);
+    if (iResult == SOCKET_ERROR)
+    {
+        printf("shutdown failed with error: %d\n", WSAGetLastError());
+        closesocket(clientSocket);
+        WSACleanup();
+        return 1;
+    }
+
+    // Close client socket connection
+    closesocket(clientSocket);
+    WSACleanup();
 
     std::cout << "Closing ..." << std::endl;
     return 0;
