@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #define DEFAULT_PORT "54321"
-#define DEFAULT_BUFLEN 512
+#define DEFAULT_BUFLEN 256
 
 int main() {
     std::cout << "Server starting ... " << std::endl;
