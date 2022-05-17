@@ -7,7 +7,7 @@
 #define DEFAULT_BUFLEN 256
 
 int main() {
-    std::cout << "Server starting ... " << std::endl;
+    std::cout << "Server starting ... ";
 
     WSADATA wsaData;
     int iResult;
@@ -15,6 +15,8 @@ int main() {
     char recvbuf[DEFAULT_BUFLEN];       // char buffer
     int iSendResult;
     int recvbuflen = DEFAULT_BUFLEN;
+
+    int messageCount = 0;
 
     struct addrinfo *result = NULL;
     struct addrinfo hints;
@@ -32,7 +34,7 @@ int main() {
     iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
     if (iResult != 0)
     {
-        printf("WSAStartup failed: %d\n", iResult);
+        printf("\nWSAStartup failed: %d\n", iResult);
         return 1;
     }
 
@@ -47,7 +49,7 @@ int main() {
     iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
     if (iResult != 0)
     {
-        printf("getaddrinfo failed: %d\n", iResult);
+        printf("\ngetaddrinfo failed: %d\n", iResult);
         WSACleanup();                       // Terminates Winsock2 DLL
         return 1;
     }
@@ -56,7 +58,7 @@ int main() {
     listenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
     if (listenSocket == INVALID_SOCKET)
     {
-        printf("Error at socket(): %ld\n", WSAGetLastError());
+        printf("\nError at socket(): %ld\n", WSAGetLastError());
         freeaddrinfo(result);
         WSACleanup();
         return 1;
@@ -66,19 +68,20 @@ int main() {
     iResult = bind(listenSocket, result->ai_addr, (int)result->ai_addrlen);
     if (iResult == SOCKET_ERROR)
     {
-        printf("Bind failed with error: %d\n", WSAGetLastError());
+        printf("\nBind failed with error: %d\n", WSAGetLastError());
         freeaddrinfo(result);
         closesocket(listenSocket);
         WSACleanup();
         return 1;
     }
+    std::cout << "Waiting for connection ... ";
 
     // Once bind is complete addrinfo from result is no longer required
     freeaddrinfo(result);
 
     if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR)
     {
-        printf("Listen failed with error: %ld\n", WSAGetLastError());
+        printf("\nListen failed with error: %ld\n", WSAGetLastError());
         closesocket(listenSocket);
         WSACleanup();
         return 1;
@@ -88,20 +91,23 @@ int main() {
     clientSocket = accept(listenSocket, NULL, NULL);
     if (clientSocket == INVALID_SOCKET)
     {
-        printf("accept failed: %d\n", WSAGetLastError());
+        printf("\naccept failed: %d\n", WSAGetLastError());
         closesocket(clientSocket);
         WSACleanup();
         return 1;
     }
+
+    std::cout << "Connected!" << std::endl;
 
     // Close listen socket once connection has been made
     closesocket(listenSocket);
 
     // Receive until client closes connection
     do {
+        messageCount++;
+
         iResult = recv(clientSocket, recvbuf, recvbuflen, 0);
         if (iResult > 0) {
-            printf("Bytes received : %d, ", iResult);
 
             // Echo buffer back to sender
             iSendResult = send(clientSocket, recvbuf, iResult, 0);
@@ -111,19 +117,23 @@ int main() {
                 WSACleanup();
                 return 1;
             }
-            printf("Bytes sent: %d\n", iSendResult);
 
-            std::cout << "Echoing: ";
+            std::cout << "========================================" << std::endl;
+            std::cout << "Message [" << messageCount << "]:" << std::endl;
+
             // Print out recvbuf to console
             for(int i = 0; i < iResult; i++)
             {
                 std::cout << recvbuf[i];
             }
 
-            std::cout << "\n\n";
+            std::cout << "\n";
+            printf("Bytes received : %d, ", iResult);
+            printf("Bytes sent: %d\n", iSendResult);
+            std::cout << "========================================" << std::endl;
 
         } else if (iResult == 0) {
-            printf("Connection closing ... \n");
+            printf("Connection closing ... ");
         } else {
             printf("recv failed: %d\n", WSAGetLastError());
             closesocket(clientSocket);
@@ -136,7 +146,7 @@ int main() {
     iResult = shutdown(clientSocket, SD_SEND);
     if (iResult == SOCKET_ERROR)
     {
-        printf("shutdown failed with error: %d\n", WSAGetLastError());
+        printf("\nshutdown failed with error: %d\n", WSAGetLastError());
         closesocket(clientSocket);
         WSACleanup();
         return 1;
@@ -146,6 +156,6 @@ int main() {
     closesocket(clientSocket);
     WSACleanup();
 
-    std::cout << "Closing ..." << std::endl;
+    std::cout << "Closed!" << std::endl;
     return 0;
 }
