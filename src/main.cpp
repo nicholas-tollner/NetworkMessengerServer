@@ -6,8 +6,6 @@
 #define DEFAULT_PORT "54321"
 #define DEFAULT_BUFLEN 512
 
- // Create 3 addrinfo structs from ws2tcpip.h
-
 int main() {
     std::cout << "Server starting ... " << std::endl;
 
@@ -114,6 +112,15 @@ int main() {
                 return 1;
             }
             printf("Bytes sent: %d\n", iSendResult);
+
+            // Print out recvbuf to console
+            for(int i = 0; i < strlen(recvbuf); i++)
+            {
+                std::cout << recvbuf[i];
+            }
+
+            std::cout << "\n";
+
         } else if (iResult == 0) {
             printf("Connection closing ... \n");
         } else {
@@ -124,7 +131,7 @@ int main() {
         }
     } while (iResult > 0);
 
-    // Shutdown connections to
+    // Shutdown connections to clients
     iResult = shutdown(clientSocket, SD_SEND);
     if (iResult == SOCKET_ERROR)
     {
