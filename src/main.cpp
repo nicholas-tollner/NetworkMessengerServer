@@ -101,25 +101,26 @@ int main() {
     do {
         iResult = recv(clientSocket, recvbuf, recvbuflen, 0);
         if (iResult > 0) {
-            printf("Bytes received : %d\n", iResult);
+            printf("Bytes received : %d, ", iResult);
 
             // Echo buffer back to sender
             iSendResult = send(clientSocket, recvbuf, iResult, 0);
             if (iSendResult == SOCKET_ERROR) {
-                printf("send failed: %d\n", WSAGetLastError());
+                printf("\nsend failed: %d\n", WSAGetLastError());
                 closesocket(clientSocket);
                 WSACleanup();
                 return 1;
             }
             printf("Bytes sent: %d\n", iSendResult);
 
+            std::cout << "Echoing: ";
             // Print out recvbuf to console
-            for(int i = 0; i < strlen(recvbuf); i++)
+            for(int i = 0; i < iResult; i++)
             {
                 std::cout << recvbuf[i];
             }
 
-            std::cout << "\n";
+            std::cout << "\n\n";
 
         } else if (iResult == 0) {
             printf("Connection closing ... \n");
