@@ -50,8 +50,6 @@ int Server::init() {
 int Server::listenConnections() {
     // Setup server socket to listen for connections
     while (connections < MAX_CONNECTIONS) {
-        std::cout << "Connections: " << connections << std::endl;
-
         // Create server socket
         listenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
         if (listenSocket == INVALID_SOCKET) {
@@ -90,6 +88,7 @@ int Server::listenConnections() {
         }
         connections++;
         std::cout << "Connected with Client [" << connections - 1 << "]" << std::endl;
+        std::cout << "Connections: " << connections << std::endl;
 
         // Close listen socket once connection has been made
         closesocket(listenSocket);
@@ -134,7 +133,8 @@ int Server::receiveClient(int client_no)
         } else if (iResult == 0) {
             printf("Connection closing ... ");
         } else {
-            printf("recv failed: %d\n", WSAGetLastError());
+            std::cout << "Client [" << client_no << "] disconnected" << std::endl;
+            //printf("recv failed: %d\n", WSAGetLastError());
             closesocket(tmp_client);
             WSACleanup();
             return 1;
