@@ -21,19 +21,18 @@ public:
     int listenConnections();
     int receiveData();
     int receiveClient(int client_no);
-    int sendData(int socket_index);
+    int sendData(int target_index, int sender_index);
     int close();
 
     WSADATA wsaData;
     int iResult;
 
     char recvbuf[DEFAULT_BUFLEN];       // char buffer
+    char sendbuf[DEFAULT_BUFLEN + 10] = {'C', 'l', 'i', 'e', 'n', 't', '_', '#', ':', ' '};
+
     int iSendResult;
     int recvbuflen = DEFAULT_BUFLEN;
-
-    int messageCount = 0;
     int connections = 0;
-
 
     struct addrinfo *result = NULL;
     struct addrinfo hints;
