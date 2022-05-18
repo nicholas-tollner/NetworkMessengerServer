@@ -118,21 +118,17 @@ int Server::receiveClient(int client_no)
         if (iResult > 0) {
             if (client_no == 1)
             {
-                std::thread send_thread([this] {sendData(1, 0);});
-
                 std::cout << "========================================" << std::endl;
-                printf("Bytes received : %d, ", iResult);
-                printf("Bytes sent: %d\n", iSendResult);
+                printf("Bytes received : %d\n", iResult);
 
+                std::thread send_thread([this] {sendData(1, 0);});
                 send_thread.join();
             } else if (client_no == 2)
             {
-                std::thread send_thread([this] {sendData(0, 1);});
-
                 std::cout << "========================================" << std::endl;
-                printf("Bytes received : %d, ", iResult);
-                printf("Bytes sent: %d\n", iSendResult);
+                printf("Bytes received : %d\n", iResult);
 
+                std::thread send_thread([this] {sendData(0, 1);});
                 send_thread.join();
             }
         } else if (iResult == 0) {
@@ -169,7 +165,7 @@ int Server::sendData(int target_index, int sender_index) {
         WSACleanup();
         return 1;
     }
-    std::cout << "\nSent to Client_" << target_index << "!" << std::endl;
+    std::cout << "\nSent " << iSendResult << " bytes to Client_" << target_index << std::endl;
     std::cout << "========================================" << std::endl;
 }
 
