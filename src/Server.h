@@ -11,7 +11,6 @@
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <thread>
 
 class Server {
 public:
@@ -22,7 +21,7 @@ public:
     int listenConnections();
     int receiveData();
     int receiveClient(int client_no);
-    int sendData();
+    int sendData(int socket_index);
     int close();
 
     WSADATA wsaData;

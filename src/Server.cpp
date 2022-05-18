@@ -117,23 +117,45 @@ int Server::receiveClient(int client_no)
         iResult = recv(tmp_client, recvbuf, recvbuflen, 0);
 
         if (iResult > 0) {
-            std::thread send_thread([this] {sendData();});
-
-            // Print recvbuf to server console
-            std::cout << "========================================" << std::endl;
-            std::cout << "Message [" << messageCount << "]:" << std::endl;
-
-            for(int i = 0; i < iResult; i++)
+            if (client_no == 1)
             {
-                std::cout << recvbuf[i];
+                std::thread send_thread([this] {sendData(1);});
+
+                // Print recvbuf to server console
+                std::cout << "========================================" << std::endl;
+                std::cout << "Message [" << messageCount << "]:" << std::endl;
+
+                for(int i = 0; i < iResult; i++)
+                {
+                    std::cout << recvbuf[i];
+                }
+
+                std::cout << "\n";
+                printf("Bytes received : %d, ", iResult);
+                printf("Bytes sent: %d\n", iSendResult);
+                std::cout << "========================================" << std::endl;
+
+                send_thread.join();
+            } else if (client_no == 2)
+            {
+                std::thread send_thread([this] {sendData(0);});
+
+                // Print recvbuf to server console
+                std::cout << "========================================" << std::endl;
+                std::cout << "Message [" << messageCount << "]:" << std::endl;
+
+                for(int i = 0; i < iResult; i++)
+                {
+                    std::cout << recvbuf[i];
+                }
+
+                std::cout << "\n";
+                printf("Bytes received : %d, ", iResult);
+                printf("Bytes sent: %d\n", iSendResult);
+                std::cout << "========================================" << std::endl;
+
+                send_thread.join();
             }
-
-            std::cout << "\n";
-            printf("Bytes received : %d, ", iResult);
-            printf("Bytes sent: %d\n", iSendResult);
-            std::cout << "========================================" << std::endl;
-
-            send_thread.join();
         } else if (iResult == 0) {
             printf("Connection closing ... ");
         } else {
@@ -145,23 +167,13 @@ int Server::receiveClient(int client_no)
     } while(iResult > 0);
 }
 
-int Server::sendData() {
-    std::cout << "Attempting send to client_1" << std::endl;
-    // Echo buffer to client_1
-    iSendResult = send(clientSocket[0], recvbuf, iResult, 0);
+int Server::sendData(int socket_index) {
+    std::cout << "Attempting send to client_" << socket_index + 1 << std::endl;
+    // Echo buffer to client
+    iSendResult = send(clientSocket[socket_index], recvbuf, iResult, 0);
     if (iSendResult == SOCKET_ERROR) {
         printf("\nsend failed: %d\n", WSAGetLastError());
-        closesocket(clientSocket[0]);
-        WSACleanup();
-        return 1;
-    }
-
-    std::cout << "Attempting send to client_2" << std::endl;
-    // Echo buffer to client_2
-    iSendResult = send(clientSocket[1], recvbuf, iResult, 0);
-    if (iSendResult == SOCKET_ERROR) {
-        printf("\nsend failed: %d\n", WSAGetLastError());
-        closesocket(clientSocket[1]);
+        closesocket(clientSocket[socket_index]);
         WSACleanup();
         return 1;
     }

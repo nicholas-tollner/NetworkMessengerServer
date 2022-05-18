@@ -10,7 +10,7 @@ int main() {
 
     if (server->init() != 0)
     {
-        std::cout << "Server failed to start" << std::endl;
+        std::cout << "Winsock setup failed" << std::endl;
     }
 
     if (server->listenConnections() != 0)
