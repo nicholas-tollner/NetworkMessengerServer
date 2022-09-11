@@ -1,0 +1,4 @@
+﻿  main.cpp
+D:\Projects\NetworkServer\NetworkServer\NetworkServer\Server.h(45,12): warning C4200: nonstandard extension used: zero-sized array in struct/union
+D:\Projects\NetworkServer\NetworkServer\NetworkServer\Server.h(45,12): message : This member will be ignored by a defaulted constructor or copy/move assignment operator
+  NetworkServer.vcxproj -> D:\Projects\NetworkServer\NetworkServer\x64\Debug\NetworkServer.exe
