@@ -1,0 +1,3 @@
+D:/Projects/NetworkServer/NetworkMessengerServer/out/build/x64-Debug/CMakeFiles/NetworkMessengerServer.dir
+D:/Projects/NetworkServer/NetworkMessengerServer/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+D:/Projects/NetworkServer/NetworkMessengerServer/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir

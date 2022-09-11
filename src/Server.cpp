@@ -43,13 +43,14 @@ int Server::init() {
         return 1;
     }
 
-    std::cout << "Waiting for [" << MAX_CONNECTIONS << "] "<< "connections ... " << std::endl;
     return 0;
 }
 
 int Server::listenConnections() {
+    connections = 0;
     // Setup server socket to listen for connections
     while (connections < MAX_CONNECTIONS) {
+        std::cout << "Setting up socket ... ";
         // Create server socket
         listenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
         if (listenSocket == INVALID_SOCKET) {
@@ -58,7 +59,9 @@ int Server::listenConnections() {
             WSACleanup();
             return 1;
         }
+        std::cout << "Success!" << std::endl;
 
+        std::cout << "Attempting bind ... ";
         iResult = bind(listenSocket, result->ai_addr, (int) result->ai_addrlen);
         if (iResult == SOCKET_ERROR) {
             printf("\nBind failed with error: %d\n", WSAGetLastError());
@@ -67,18 +70,22 @@ int Server::listenConnections() {
             WSACleanup();
             return 1;
         }
+        std::cout << "Success!" << std::endl;
 
         // Once bind is complete addrinfo from result is no longer required
         freeaddrinfo(result);
 
+        std::cout << "Attempting listen ... ";
         if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
             printf("\nListen failed with error: %ld\n", WSAGetLastError());
             closesocket(listenSocket);
             WSACleanup();
             return 1;
         }
+        std::cout << "Success!" << std::endl;
 
         // Accept a socket connection from client
+        std::cout << "Accepting connection ... ";
         clientSocket[connections] = accept(listenSocket, NULL, NULL);
         if (clientSocket[connections] == INVALID_SOCKET) {
             printf("\naccept failed: %d\n", WSAGetLastError());
@@ -86,9 +93,9 @@ int Server::listenConnections() {
             WSACleanup();
             return 1;
         }
+        std::cout << "Success!\n" << std::endl;
         connections++;
-        std::cout << "Connected with Client [" << connections - 1 << "]" << std::endl;
-        std::cout << "Connections: " << connections << std::endl;
+
 
         // Close listen socket once connection has been made
         closesocket(listenSocket);
@@ -99,10 +106,8 @@ int Server::listenConnections() {
 
 int Server::receiveData() {
     std::thread client_1([this] { receiveClient(1);});
-    std::thread client_2([this] { receiveClient(2);});
 
     client_1.join();
-    client_2.join();
 
     return 0;
 }
@@ -120,20 +125,13 @@ int Server::receiveClient(int client_no)
                 std::cout << "========================================" << std::endl;
                 printf("Bytes received : %d\n", iResult);
 
-                std::thread send_thread([this] {sendData(1, 0);});
-                send_thread.join();
-            } else if (client_no == 2)
-            {
-                std::cout << "========================================" << std::endl;
-                printf("Bytes received : %d\n", iResult);
-
-                std::thread send_thread([this] {sendData(0, 1);});
+                std::thread send_thread([this] {sendData(1, 0); });
                 send_thread.join();
             }
         } else if (iResult == 0) {
             printf("Connection closing ... ");
         } else {
-            std::cout << "Client [" << client_no << "] disconnected" << std::endl;
+            std::cout << " === Client [" << client_no << "] Disconnected === " << std::endl;
             //printf("recv failed: %d\n", WSAGetLastError());
             closesocket(tmp_client);
             WSACleanup();
@@ -180,19 +178,8 @@ int Server::close() {
         return 1;
     }
 
-    // Shutdown connections to clients
-    iResult = shutdown(clientSocket[1], SD_SEND);
-    if (iResult == SOCKET_ERROR)
-    {
-        printf("\nshutdown failed with error: %d\n", WSAGetLastError());
-        closesocket(clientSocket[1]);
-        WSACleanup();
-        return 1;
-    }
-
     // Close client socket connection
     closesocket(clientSocket[0]);
-    closesocket(clientSocket[1]);
     WSACleanup();
 
     return 0;

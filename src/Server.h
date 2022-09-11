@@ -7,7 +7,7 @@
 
 #define DEFAULT_PORT "54321"
 #define DEFAULT_BUFLEN 256
-#define MAX_CONNECTIONS 2
+#define MAX_CONNECTIONS 1
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -23,6 +23,9 @@ public:
     int receiveClient(int client_no);
     int sendData(int target_index, int sender_index);
     int close();
+
+    bool isRunning = true;
+    bool closeConnection = false;
 
     WSADATA wsaData;
     int iResult;
