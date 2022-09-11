@@ -21,7 +21,7 @@ public:
     int listenConnections();
     int receiveData();
     int receiveClient(int client_no);
-    int sendData(int target_index, int sender_index);
+    int sendData(int target_index);
     int close();
 
     bool isRunning = true;
@@ -31,7 +31,7 @@ public:
     int iResult;
 
     char recvbuf[DEFAULT_BUFLEN];       // char buffer
-    char sendbuf[DEFAULT_BUFLEN + 10] = {'C', 'l', 'i', 'e', 'n', 't', '_', '#', ':', ' '};
+    char sendbuf[DEFAULT_BUFLEN] = {'P', 'o', 'n', 'g', '!'};       // Returned after ping
 
     int iSendResult;
     int recvbuflen = DEFAULT_BUFLEN;

@@ -122,17 +122,22 @@ int Server::receiveClient(int client_no)
         if (iResult > 0) {
             if (client_no == 1)
             {
-                std::cout << "========================================" << std::endl;
                 printf("Bytes received : %d\n", iResult);
 
-                std::thread send_thread([this] {sendData(1, 0); });
+                // Print out message to console
+                std::cout << "Message: ";
+                for (int i = 0; i < iResult; i++)
+                {
+                    std::cout << recvbuf[i];
+                }
+
+                std::thread send_thread([this] {sendData(0); });
                 send_thread.join();
             }
         } else if (iResult == 0) {
             printf("Connection closing ... ");
         } else {
             std::cout << " === Client [" << client_no << "] Disconnected === " << std::endl;
-            //printf("recv failed: %d\n", WSAGetLastError());
             closesocket(tmp_client);
             WSACleanup();
             return 1;
@@ -140,31 +145,16 @@ int Server::receiveClient(int client_no)
     } while(iResult > 0);
 }
 
-int Server::sendData(int target_index, int sender_index) {
-    int nameLength = 10;
+int Server::sendData(int target_index) {
 
-    // Append client name and send to other client
-    sendbuf[7] = '0' + sender_index;
-
-    for(int i = 0; i < DEFAULT_BUFLEN; i++)
-    {
-        sendbuf[10 + i] = recvbuf[i];
-    }
-
-    for(int i = 0; i < iResult + nameLength; i++)
-    {
-        std::cout << sendbuf[i];
-    }
-
-    iSendResult = send(clientSocket[target_index], sendbuf, iResult + nameLength, 0);
+    iSendResult = send(clientSocket[target_index], sendbuf, iResult, 0);
     if (iSendResult == SOCKET_ERROR) {
         printf("\nsend failed: %d\n", WSAGetLastError());
         closesocket(clientSocket[target_index]);
         WSACleanup();
         return 1;
     }
-    std::cout << "\nSent " << iSendResult << " bytes to Client_" << target_index << std::endl;
-    std::cout << "========================================" << std::endl;
+    std::cout << "\nReturned " << iSendResult << " bytes to client!\n" << std::endl;
 }
 
 int Server::close() {

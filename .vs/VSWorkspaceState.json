@@ -2,9 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\out",
-    "\\out\\build",
     "\\src"
   ],
-  "SelectedNode": "\\src\\Server.cpp",
+  "SelectedNode": "\\.gitignore",
   "PreviewInSolutionExplorer": false
 }
