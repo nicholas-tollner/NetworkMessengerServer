@@ -1,9 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\out",
-    "\\src"
+    "\\NetworkServer"
   ],
-  "SelectedNode": "\\.gitignore",
+  "SelectedNode": "\\NetworkServer.sln",
   "PreviewInSolutionExplorer": false
 }

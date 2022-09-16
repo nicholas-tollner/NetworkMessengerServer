@@ -21,7 +21,7 @@ int main() {
             std::cout << "Connections failed" << std::endl;
         }
 
-        if (server->receiveData() != 0)
+        if (server->receiveClient(1) != 0)
         {
             std::cout << "Receive failed" << std::endl;
         }

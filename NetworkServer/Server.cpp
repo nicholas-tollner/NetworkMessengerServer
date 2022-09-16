@@ -104,14 +104,6 @@ int Server::listenConnections() {
     return 0;
 }
 
-int Server::receiveData() {
-    std::thread client_1([this] { receiveClient(1); });
-
-    client_1.join();
-
-    return 0;
-}
-
 int Server::receiveClient(int client_no)
 {
     SOCKET tmp_client = clientSocket[client_no - 1];
@@ -134,17 +126,13 @@ int Server::receiveClient(int client_no)
                 std::thread send_thread([this] {sendData(0); });
                 send_thread.join();
             }
-        }
-        else if (iResult == 0) {
-            printf("Connection closing ... ");
-        }
-        else {
-            std::cout << " === Client [" << client_no << "] Disconnected === " << std::endl;
-            closesocket(tmp_client);
-            WSACleanup();
-            return 1;
-        }
+        }  
     } while (iResult > 0);
+
+    std::cout << " === Client [" << client_no << "] Disconnected === " << std::endl;
+    closesocket(tmp_client);
+    WSACleanup();
+    return 0;
 }
 
 int Server::sendData(int target_index) {
